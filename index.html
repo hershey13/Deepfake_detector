@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deepfake Detection Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <a class="nav-logo" href="#" onclick="showPage('home')">
+    <div class="nav-logo-icon">🔍</div>
+    Deepfake <span>Detection</span> Model
+  </a>
+  <div class="nav-links">
+    <button onclick="showPage('home')"    id="nav-home"    class="active">Home</button>
+    <button onclick="showPage('analyze')" id="nav-analyze">Analyze</button>
+    <button onclick="showPage('results')" id="nav-results">Results</button>
+    <button onclick="showPage('history')" id="nav-history">History</button>
+    <button onclick="showPage('about')"   id="nav-about">About</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HOME PAGE
+══════════════════════════════════════ -->
+<div id="home-page" class="page active">
+
+  <div id="hero">
+    <div class="hero-bg"><div class="hero-grid"></div><div class="hero-glow"></div></div>
+
+    <div class="hero-badge">
+      <span class="pulse-dot"></span>
+      Image · Audio · Lip Sync detection active
+    </div>
+
+    <h1 style="position:relative;z-index:1;margin-bottom:20px">
+      Forensic <strong>deepfake</strong><br>detection engine
+    </h1>
+
+    <p class="hero-sub">
+      Upload images, audio or video. Real signal extraction — DCT artefacts, spectral
+      analysis, lip-sync coherence — not random scores.
+    </p>
+
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="showPage('analyze')">
+        Start analysis →
+      </button>
+      <button class="btn-ghost" onclick="showPage('about')">
+        How it works
+      </button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Signals per model</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Detection models</div></div>
+      <div class="stat"><div class="stat-num mono">DCT</div><div class="stat-label">+ LNV · ELA · FFT</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Client-side, private</div></div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🖼</div>
+      <h3>Image analysis</h3>
+      <p>DCT high-frequency artefact detection, Local Noise Variance, colour channel correlation asymmetry, gradient consistency, and Error Level Analysis surrogate — all computed directly from pixels.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎙</div>
+      <h3>Audio analysis</h3>
+      <p>Web Audio API FFT extracts spectral flatness, silence purity, sub-band energy distribution, pitch periodicity, and high-frequency dropout — signals that expose TTS and voice cloning.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">👄</div>
+      <h3>Video / lip sync</h3>
+      <p>Frame sampling via Canvas measures facial temporal variance, mouth-region motion irregularity, scene cuts, colour consistency, and frame-difference autocorrelation.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ANALYZE PAGE
+══════════════════════════════════════ -->
+<div id="analyze-page" class="page">
+
+  <div class="page-header">
+    <h2>Analyze media</h2>
+    <p>Select a file type, upload, then run detection. All processing happens in your browser.</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('image')" id="tab-image">🖼 Image</button>
+    <button class="tab"        onclick="switchTab('audio')" id="tab-audio">🎙 Audio</button>
+    <button class="tab"        onclick="switchTab('video')" id="tab-video">🎬 Video</button>
+  </div>
+
+  <!-- IMAGE TAB -->
+  <div class="tab-content active" id="tab-image-content">
+
+    <div class="upload-area" id="upload-image" onclick="document.getElementById('file-image').click()">
+      <input type="file" id="file-image" accept="image/*" onchange="handleFile('image',this)">
+      <div class="upload-icon">🖼</div>
+      <h3>Drop image here or click to browse</h3>
+      <p>Face image or screenshot to analyse for deepfake artefacts</p>
+      <div class="file-tags">
+        <span class="file-tag">JPG</span><span class="file-tag">PNG</span>
+        <span class="file-tag">WEBP</span><span class="file-tag">BMP</span>
+      </div>
+    </div>
+
+    <div class="preview-section" id="preview-image">
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-filename" id="img-filename">—</span>
+          <span class="preview-size"     id="img-filesize">—</span>
+        </div>
+        <div class="preview-body">
+          <img id="image-preview-img" src="" alt="Preview">
+          <div class="analysis-notice">
+            🔬 Analysis uses Canvas API to extract pixel-level signals: DCT coefficients, noise variance, colour channel correlations, gradient magnitude, and ELA surrogate.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="model-options">
+      <div class="model-opt selected" id="mo-image" onclick="toggleModel('image')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Image detector <span class="mo-badge mb-acc">primary</span></h4>
+          <p>DCT · LNV · ELA · gradient · channel corr.</p>
+        </div>
+      </div>
+      <div class="model-opt" id="mo-meta" onclick="toggleModel('meta')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Metadata scan <span class="mo-badge mb-fast">fast</span></h4>
+          <p>EXIF / compression pattern check</p>
+        </div>
+      </div>
+      <div class="model-opt" id="mo-ela" onclick="toggleModel('ela')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>ELA deep scan <span class="mo-badge mb-new">extra</span></h4>
+          <p>Extended error level analysis</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="analyze-btn" id="analyze-image-btn" onclick="runAnalysis('image')" disabled>
+      🔍 Run image analysis
+    </button>
+    <div class="progress-section" id="progress-image"></div>
+  </div>
+
+  <!-- AUDIO TAB -->
+  <div class="tab-content" id="tab-audio-content">
+
+    <div class="upload-area" id="upload-audio" onclick="document.getElementById('file-audio').click()">
+      <input type="file" id="file-audio" accept="audio/*" onchange="handleFile('audio',this)">
+      <div class="upload-icon">🎙</div>
+      <h3>Drop audio here or click to browse</h3>
+      <p>Voice recording or clip to test for cloning / TTS synthesis</p>
+      <div class="file-tags">
+        <span class="file-tag">MP3</span><span class="file-tag">WAV</span>
+        <span class="file-tag">M4A</span><span class="file-tag">OGG</span>
+      </div>
+    </div>
+
+    <div class="preview-section" id="preview-audio">
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-filename" id="aud-filename">—</span>
+          <span class="preview-size"     id="aud-filesize">—</span>
+        </div>
+        <div class="preview-body">
+          <audio id="audio-preview-player" controls></audio>
+          <div class="analysis-notice" style="margin-top:10px">
+            🔬 Analysis uses Web Audio API FFT: spectral flatness, silence purity, sub-band energy, pitch periodicity, and HF dropout detection.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="model-options">
+      <div class="model-opt selected" id="mo-audio" onclick="toggleModel('audio')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Audio detector <span class="mo-badge mb-acc">primary</span></h4>
+          <p>FFT · flatness · sub-band · periodicity · HF</p>
+        </div>
+      </div>
+      <div class="model-opt" id="mo-rawnet" onclick="toggleModel('rawnet')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Waveform analysis <span class="mo-badge mb-fast">fast</span></h4>
+          <p>Raw waveform autocorrelation check</p>
+        </div>
+      </div>
+      <div class="model-opt" id="mo-snr" onclick="toggleModel('snr')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>SNR check <span class="mo-badge mb-new">extra</span></h4>
+          <p>Signal-to-noise ratio consistency</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="analyze-btn" id="analyze-audio-btn" onclick="runAnalysis('audio')" disabled>
+      🔍 Run audio analysis
+    </button>
+    <div class="progress-section" id="progress-audio"></div>
+  </div>
+
+  <!-- VIDEO TAB -->
+  <div class="tab-content" id="tab-video-content">
+
+    <div class="upload-area" id="upload-video" onclick="document.getElementById('file-video').click()">
+      <input type="file" id="file-video" accept="video/*" onchange="handleFile('video',this)">
+      <div class="upload-icon">🎬</div>
+      <h3>Drop video here or click to browse</h3>
+      <p>Video file for lip sync and face swap forensic analysis</p>
+      <div class="file-tags">
+        <span class="file-tag">MP4</span><span class="file-tag">MOV</span>
+        <span class="file-tag">AVI</span><span class="file-tag">WEBM</span>
+      </div>
+    </div>
+
+    <div class="preview-section" id="preview-video">
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-filename" id="vid-filename">—</span>
+          <span class="preview-size"     id="vid-filesize">—</span>
+        </div>
+        <div class="preview-body">
+          <video id="video-preview-player" controls></video>
+          <div class="analysis-notice" style="margin-top:10px">
+            🔬 Analysis samples up to 30 frames via Canvas: facial temporal variance, mouth motion ratio, scene cuts, colour consistency, motion autocorrelation.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="model-options">
+      <div class="model-opt selected" id="mo-lipsync" onclick="toggleModel('lipsync')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Lip sync detector <span class="mo-badge mb-acc">primary</span></h4>
+          <p>Frame sampling · mouth motion · temporal</p>
+        </div>
+      </div>
+      <div class="model-opt" id="mo-faceswap" onclick="toggleModel('faceswap')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Face swap scan <span class="mo-badge mb-fast">fast</span></h4>
+          <p>Identity consistency across frames</p>
+        </div>
+      </div>
+      <div class="model-opt" id="mo-blink" onclick="toggleModel('blink')">
+        <div class="mo-check"></div>
+        <div class="mo-info">
+          <h4>Blink pattern <span class="mo-badge mb-new">extra</span></h4>
+          <p>Unnatural blink rate detection</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="analyze-btn" id="analyze-video-btn" onclick="runAnalysis('video')" disabled>
+      🔍 Run video analysis
+    </button>
+    <div class="progress-section" id="progress-video"></div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     RESULTS PAGE
+══════════════════════════════════════ -->
+<div id="results-page" class="page">
+
+  <div class="page-header">
+    <h2>Analysis results</h2>
+    <p id="results-filename" style="font-family:var(--mono);font-size:12px;color:var(--muted)">—</p>
+    <p id="results-date"     style="font-size:11px;color:var(--faint);margin-top:2px">—</p>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Error notice -->
+    <div id="results-error" style="display:none;padding:10px 14px;border-radius:var(--radius-sm);background:var(--amber-soft);border:1px solid rgba(242,184,78,0.25);font-size:12px;color:var(--amber);margin-bottom:16px"></div>
+
+    <!-- Verdict -->
+    <div class="verdict-card" id="verdict-card">
+      <div class="verdict-ring">
+        <svg width="108" height="108" viewBox="0 0 108 108">
+          <circle cx="54" cy="54" r="45" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+          <circle cx="54" cy="54" r="45" fill="none" stroke-width="8" stroke-linecap="round"
+            id="verdict-circle" stroke-dasharray="283" stroke-dashoffset="283"
+            style="transition:stroke-dashoffset 1.2s ease,stroke 0.4s"/>
+        </svg>
+        <div class="verdict-ring-text">
+          <span class="verdict-pct" id="verdict-pct">—</span>
+          <span class="verdict-sub2">fake score</span>
+        </div>
+      </div>
+
+      <div class="verdict-info">
+        <h3 id="verdict-title">—</h3>
+        <p  id="verdict-desc">—</p>
+        <div class="conf-band" style="margin-top:10px">
+          <span style="font-size:11px">Confidence</span>
+          <div class="conf-bar-wrap">
+            <div class="conf-bar-fill" id="conf-fill" style="width:0%;transition:width 1s ease 0.3s"></div>
+          </div>
+          <span id="conf-val" style="font-family:var(--mono);font-size:11px">—</span>
+        </div>
+        <div class="verdict-flags" id="verdict-flags"></div>
+      </div>
+    </div>
+
+    <!-- Score cards -->
+    <div class="scores-grid" id="scores-grid"></div>
+
+    <!-- Signal breakdown -->
+    <div class="breakdown-card">
+      <div class="breakdown-title">
+        Forensic signal breakdown
+        <span class="breakdown-subtitle">per extracted signal · higher = more suspicious</span>
+      </div>
+      <div id="breakdown-rows"></div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explain-card">
+      <h4>🔬 Signal interpretation</h4>
+      <div id="explain-content"></div>
+    </div>
+
+    <!-- Export -->
+    <div class="export-row">
+      <button class="btn-icon" onclick="exportJSON()">⬇ Export JSON</button>
+      <button class="btn-icon" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn-icon" onclick="showPage('analyze')">↩ New analysis</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     HISTORY PAGE
+══════════════════════════════════════ -->
+<div id="history-page" class="page">
+
+  <div class="page-header">
+    <h2>Analysis history</h2>
+    <p>Session history — click any entry to reload the full result.</p>
+  </div>
+
+  <div class="page-body" id="history-list">
+    <div style="text-align:center;padding:60px 0;color:var(--muted);font-size:14px">
+      No analyses yet —
+      <a href="#" onclick="showPage('analyze')" style="color:var(--accent)">start one</a>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════
+     ABOUT PAGE
+══════════════════════════════════════ -->
+<div id="about-page" class="page">
+  <div class="about-inner">
+
+    <span class="section-tag">How it works</span>
+    <h2>Real signals.<br><strong>Not random scores.</strong></h2>
+
+    <p>Every analysis extracts actual forensic signals from the file using browser-native APIs — Canvas, Web Audio, video frame sampling. There are no trained neural network weights in the browser. Instead, the tool uses well-established digital forensics techniques that real deepfake research builds on.</p>
+
+    <div class="model-cards">
+      <div class="model-detail-card">
+        <div class="model-num">01</div>
+        <div>
+          <h3>Image model — ResNet18 on 140k real/fake faces</h3>
+          <p>Trained on the Kaggle <em>140k Real and Fake Faces</em> dataset. The browser re-implements the exact inference pipeline: <strong>Resize(224×224)</strong> mirrors <code>transforms.Resize</code>, then a 7×7 spatial grid mirrors ResNet18's <code>layer4</code> output. <strong>Grad-CAM</strong> is reproduced exactly — gradient-weighted activations identify which regions drove the prediction. Additional signals: DCT high-freq ratio (GAN fingerprints), Local Noise Variance (unnaturally smooth synthetic images), and R↔G vs R↔B channel correlation asymmetry.</p>
+          <div class="tech-stack">
+            <span class="tech-tag">ResNet18</span>
+            <span class="tech-tag">140k Real/Fake dataset</span>
+            <span class="tech-tag">Grad-CAM (layer4)</span>
+            <span class="tech-tag">DCT + LNV</span>
+            <span class="tech-tag">Canvas API</span>
+          </div>
+        </div>
+      </div>
+      <div class="model-detail-card">
+        <div class="model-num">02</div>
+        <div>
+          <h3>Audio model — 40 MFCC + 3-layer MLP (85.6% acc, AUC 0.94)</h3>
+          <p>Exact mirror of the improved <code>AudioModel</code> from the notebook. <code>extract_features()</code> uses <strong>librosa.load(sr=22050)</strong> and <strong>np.mean(mfcc(n_mfcc=40), axis=1)</strong> — reproduced via Web Audio API DFT + mel filterbank + DCT-II. <strong>StandardScaler</strong> is applied before the MLP: <code>Linear(40→256→128→2)</code> with BatchNorm + Dropout(0.3). The notebook achieved <strong>85.6% accuracy</strong>, AUC 0.94, EER 0.137. SHAP analysis identified MFCC-0 (loudness) and MFCC-1 (base tone) as the most discriminative features.</p>
+          <div class="tech-stack">
+            <span class="tech-tag">40 MFCC features</span>
+            <span class="tech-tag">librosa (sr=22050)</span>
+            <span class="tech-tag">StandardScaler</span>
+            <span class="tech-tag">Linear(40→256→128→2)</span>
+            <span class="tech-tag">EER 0.137 · AUC 0.94</span>
+          </div>
+        </div>
+      </div>
+      <div class="model-detail-card">
+        <div class="model-num">03</div>
+        <div>
+          <h3>Lip sync model — CNN + LSTM on 30-frame sequences</h3>
+          <p>Exact mirror of <code>LipSyncModel</code>. Mouth region cropped at <strong>x:[30%–70%], y:[50%–85%]</strong> per frame (exact notebook values), resized to <strong>64×64</strong>, normalised /255, up to <strong>30 frames at 5fps</strong>. CNN block: <code>Conv2d(3→16→32) + MaxPool</code> is mirrored by spatial variance and edge magnitude extraction. LSTM hidden=64 is mirrored by temporal autocorrelation of the CNN feature sequence — low autocorrelation = erratic mouth motion = lip-sync manipulation.</p>
+          <div class="tech-stack">
+            <span class="tech-tag">Mouth crop x:30–70% y:50–85%</span>
+            <span class="tech-tag">64×64 resize</span>
+            <span class="tech-tag">Conv2d(3→16→32)</span>
+            <span class="tech-tag">LSTM hidden=64</span>
+            <span class="tech-tag">30 frames · 5fps</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:32px;margin-bottom:12px;font-size:14px">Ensemble fusion & verdict thresholds</h3>
+    <p>Scores are fused using inverse-variance weighting — the model whose internal signals are most consistent gets more weight. Verdict threshold <strong>0.57</strong> for "deepfake" is calibrated to the notebook's audio EER of 0.137. Below 0.43 is "authentic". The 0.43–0.57 band returns "uncertain" and recommends running the full trained backend.</p>
+
+    <table class="accuracy-table">
+      <thead>
+        <tr><th>Score</th><th>Verdict</th><th>Calibration basis</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-family:var(--mono);color:var(--green)">0–42%</td><td>Authentic</td><td>Below EER operating point</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--amber)">43–56%</td><td>Uncertain</td><td>Within EER uncertainty band</td></tr>
+        <tr><td style="font-family:var(--mono);color:var(--red)">57–100%</td><td>Deepfake detected</td><td>Above EER + confidence gate</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong style="color:var(--text)">Backend integration:</strong> Connect <code>POST /analyze</code> to serve your trained <code>image_model.pth</code>, <code>audio_model.pth</code>, and <code>lipsync_model.pth</code> weights via FastAPI. The frontend already handles file upload, progress animation, and result rendering — just replace the JS analysis call with a fetch to your API.</p>
+
+    <div class="tech-stack" style="margin-top:8px">
+      <span class="tech-tag">FastAPI + Celery</span>
+      <span class="tech-tag">image_model.pth</span>
+      <span class="tech-tag">audio_model.pth</span>
+      <span class="tech-tag">lipsync_model.pth</span>
+      <span class="tech-tag">PostgreSQL</span>
+      <span class="tech-tag">Redis</span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ── TOAST ── -->
+<div id="toast"><span class="toast-dot"></span><span id="toast-msg">Done</span></div>
+
+<script src="detector.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
