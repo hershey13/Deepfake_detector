@@ -472,14 +472,10 @@ async function analyseAudio(file) {
       const highEnergy = mean(mfcc.slice(5, 40).map(v => v*v));
       const energyScore = clamp((highEnergy / (lowEnergy + 0.01)) * 0.35, 0, 1);
 
-      // Signal B: MFCC variance (BatchNorm1d sensitivity)
-      // TTS produces smooth spectral envelopes → low MFCC variance
-      const varScore = clamp(1 - clamp(variance(mfcc) / 4.0, 0, 1), 0, 1);
-
-      // Signal C: MFCC-0 magnitude (notebook SHAP: "captures overall loudness")
-      // Authentic speech has higher variance in MFCC-0; TTS is more controlled
-      const mfcc0Score = clamp(Math.abs(mfcc[0]) < 0.5 ? 0.72 : 0.18, 0, 1);
-
+   const mfccArray = Array.from(mfccRaw);
+const spectralVar = variance(mfccArray.slice(1, 20)); // coefficients 1–19
+const varScore = clamp(1 - clamp(spectralVar / 300, 0, 1), 0, 1);
+const mfcc = standardScale(mfccArray); // scale happens after, still used for other signals
       // Signal D: Spectral slope — MFCC gradient across coefficients
       // Real speech: MFCC envelope falls steeply from 0→40
       // Vocoder/TTS: envelope is flatter (dropout penalty removed)
