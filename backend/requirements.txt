@@ -1,12 +1,8 @@
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-python-multipart==0.0.9
-
-# PyTorch — CPU-only build (replace with GPU build if you have CUDA)
-torch==2.3.0
-torchaudio==2.3.0
-numpy==1.26.4
-
-torchvision==0.18.0
-opencv-python-headless==4.9.0.80
-Pillow==10.3.0
+fastapi
+uvicorn[standard]
+python-multipart
+numpy
+pillow
+opencv-python-headless
+torch
+torchvision
