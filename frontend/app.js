@@ -1,6 +1,6 @@
 'use strict';
 
-const API = 'http://localhost:8000';
+const API = 'https://deepfake-detector-backend-1dio.onrender.com';
 
 const State = {
   files: { image: null, audio: null, video: null },
