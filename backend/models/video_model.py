@@ -5,7 +5,7 @@ import torch.nn as nn
 import numpy as np
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "weights", "lipsync_model.pth")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,13 +42,48 @@ class LipSyncModel(nn.Module):
         return x
 
 
-model = LipSyncModel().to(device)
+def load_lipsync_model():
+    if not os.path.exists(MODEL_PATH):
+        print("Lip-sync weights not found at:", MODEL_PATH)
+        return None
 
-if os.path.exists(MODEL_PATH):
-    model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-    model.eval()
-else:
-    model = None
+    model = LipSyncModel().to(device)
+
+    try:
+        checkpoint = torch.load(MODEL_PATH, map_location=device)
+
+        if isinstance(checkpoint, dict):
+            if "model_state_dict" in checkpoint:
+                state_dict = checkpoint["model_state_dict"]
+            elif "state_dict" in checkpoint:
+                state_dict = checkpoint["state_dict"]
+            else:
+                state_dict = checkpoint
+        else:
+            state_dict = checkpoint
+
+        new_state_dict = {}
+
+        for key, value in state_dict.items():
+            if key.startswith("module."):
+                new_key = key.replace("module.", "")
+            else:
+                new_key = key
+
+            new_state_dict[new_key] = value
+
+        model.load_state_dict(new_state_dict, strict=True)
+        model.eval()
+
+        print("Lip-sync model loaded successfully from:", MODEL_PATH)
+        return model
+
+    except Exception as e:
+        print("Error loading lip-sync model:", str(e))
+        return None
+
+
+model = load_lipsync_model()
 
 
 def extract_video_sequence(video_path, seq_len=30):
@@ -61,9 +96,10 @@ def extract_video_sequence(video_path, seq_len=30):
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     if total_frames <= 0:
-        frame_indices = list(range(seq_len))
-    else:
-        frame_indices = np.linspace(0, total_frames - 1, seq_len).astype(int)
+        cap.release()
+        return None
+
+    frame_indices = np.linspace(0, total_frames - 1, seq_len).astype(int)
 
     for idx in frame_indices:
         cap.set(cv2.CAP_PROP_POS_FRAMES, int(idx))
@@ -74,8 +110,10 @@ def extract_video_sequence(video_path, seq_len=30):
 
         h, w, _ = frame.shape
 
-        x1, x2 = int(w * 0.3), int(w * 0.7)
-        y1, y2 = int(h * 0.5), int(h * 0.85)
+        x1 = int(w * 0.3)
+        x2 = int(w * 0.7)
+        y1 = int(h * 0.5)
+        y2 = int(h * 0.85)
 
         mouth = frame[y1:y2, x1:x2]
 
@@ -83,7 +121,9 @@ def extract_video_sequence(video_path, seq_len=30):
             continue
 
         mouth = cv2.resize(mouth, (64, 64))
-        mouth = mouth / 255.0
+        mouth = cv2.cvtColor(mouth, cv2.COLOR_BGR2RGB)
+        mouth = mouth.astype(np.float32) / 255.0
+
         frames.append(mouth)
 
     cap.release()
@@ -91,11 +131,7 @@ def extract_video_sequence(video_path, seq_len=30):
     if len(frames) != seq_len:
         return None
 
-    sequence = np.array(frames)
-
-    # Convert from BGR to RGB-like order is not critical here,
-    # but keep same numeric format.
-    # Shape: T, H, W, C → T, C, H, W
+    sequence = np.array(frames, dtype=np.float32)
     sequence = np.transpose(sequence, (0, 3, 1, 2))
 
     return sequence
@@ -105,9 +141,9 @@ def predict_video(file_path):
     if model is None:
         return {
             "type": "video",
-            "prediction": "Lip-sync model weights not found",
+            "prediction": "Lip-sync model weights not loaded",
             "confidence": 0,
-            "message": "Place lipsync_model.pth inside backend/weights/"
+            "message": f"Place lipsync_model.pth inside {MODEL_PATH}"
         }
 
     sequence = extract_video_sequence(file_path)
@@ -117,7 +153,7 @@ def predict_video(file_path):
             "type": "video",
             "prediction": "Could not extract enough frames",
             "confidence": 0,
-            "message": "Upload a longer/clearer video."
+            "message": "Upload a longer or clearer video."
         }
 
     tensor = torch.tensor(sequence, dtype=torch.float32).unsqueeze(0).to(device)
@@ -142,5 +178,6 @@ def predict_video(file_path):
         "prediction": prediction,
         "confidence": round(confidence * 100, 2),
         "real_probability": round(real_prob * 100, 2),
-        "fake_probability": round(fake_prob * 100, 2)
+        "fake_probability": round(fake_prob * 100, 2),
+        "model_path": MODEL_PATH
     }
