@@ -72,7 +72,7 @@ async function checkBackend() {
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 4000);
+    const timer = setTimeout(() => controller.abort(), 30000);
 
     const r = await fetch(`${API}/health`, { signal: controller.signal });
     clearTimeout(timer);
