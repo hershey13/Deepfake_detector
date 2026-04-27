@@ -20,3 +20,9 @@ scipy>=1.13.0
 torch==2.3.0+cpu
 torchvision==0.18.0+cpu
 --extra-index-url https://download.pytorch.org/whl/cpu
+
+#backend
+#python -m pip install -r requirements.txt
+#python -m uvicorn main:app --reload
+
+#frontend - npx serve .
