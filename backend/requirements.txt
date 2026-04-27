@@ -1,25 +1,14 @@
-# Web framework
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-python-multipart==0.0.9
-
-# Audio processing
-librosa==0.10.2
-soundfile==0.12.1
-audioread==3.0.1
-
-# Image / video processing
-Pillow>=10.4.0
-opencv-python-headless>=4.9.0
-
-# ML / numerical
-numpy>=1.26.4
-scipy>=1.13.0
-
-# Deep learning — CPU only (smaller, fits free tier better)
-torch==2.3.0+cpu
-torchvision==0.18.0+cpu
---extra-index-url https://download.pytorch.org/whl/cpu
+fastapi
+uvicorn
+python-multipart
+numpy
+pillow
+opencv-python-headless
+librosa
+soundfile
+torch
+torchvision
+torchaudio
 
 #backend
 #python -m pip install -r requirements.txt
