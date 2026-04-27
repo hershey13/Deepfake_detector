@@ -23,13 +23,6 @@ from models.video_model import predict_video
 
 
 app = FastAPI(title="Deepfake Detection API", version="1.0.0")
-@app.get("/")
-def home():
-    return {"message": "Deepfake Detection Backend is running"}
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
 
 origins = [
     "http://localhost:5173",
@@ -44,6 +37,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.get("/")
+def home():
+    return {"message": "Deepfake Detection Backend is running"}
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 
