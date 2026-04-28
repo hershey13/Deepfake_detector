@@ -25,12 +25,19 @@ transform = transforms.Compose([
 ])
 
 
-model = models.resnet18(weights=None)
-model.fc = nn.Linear(model.fc.in_features, 2)
-model = model.to(device)
+_model = None
+
+def get_model():
+    global _model
+    if _model is None:
+        m = models.resnet18(weights=None)
+        m.fc = nn.Linear(m.fc.in_features, 2)
+        m = m.to(device)
+        _model = load_model_weights(m)
+    return _model
 
 
-def load_model_weights():
+def load_model_weights(model):
     if not os.path.exists(MODEL_PATH):
         print("Image model weights not found:", MODEL_PATH)
         return None
@@ -56,10 +63,9 @@ def load_model_weights():
         return None
 
 
-model = load_model_weights()
-
 
 def predict_image(file_path):
+    model = get_model()
     if model is None:
         return {
             "type": "image",
