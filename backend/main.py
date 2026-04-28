@@ -7,9 +7,9 @@ app = FastAPI(title="Deepfake Detection API", version="1.0.0")
 
 # ══ CORS MUST BE FIRST — before any routes ════════════════════════════════════
 origins = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://deepfake-detection-snowy.vercel.app",
+    # "http://localhost:5173",
+    # "http://localhost:3000",
+    "https://deepfake-detection-snowy.vercel.app/",
 ]
 
 app.add_middleware(
