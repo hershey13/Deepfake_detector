@@ -74,10 +74,17 @@ class AudioModel(nn.Module):
 # Load model safely
 # ==========================================================
 
-model = AudioModel().to(device)
+_model = None
+
+def get_model():
+    global _model
+    if _model is None:
+        m = AudioModel().to(device)
+        _model = load_model_weights(m)  # pass model instance in
+    return _model
 
 
-def load_model_weights():
+def load_model_weights(model):
     if not os.path.exists(MODEL_PATH):
         print("Audio model weights not found:", MODEL_PATH)
         return None
@@ -100,17 +107,13 @@ def load_model_weights():
         # Case 4: direct checkpoint
         else:
             model.load_state_dict(checkpoint)
-
         model.eval()
-        print("Audio model loaded successfully from:", MODEL_PATH)
         return model
-
     except Exception as e:
         print("Error loading audio model:", str(e))
         return None
 
 
-model = load_model_weights()
 
 
 # ==========================================================
@@ -145,6 +148,7 @@ def extract_features(file_path):
 # ==========================================================
 
 def predict_audio(file_path):
+    model = get_model
     if model is None:
         return {
             "type": "audio",
