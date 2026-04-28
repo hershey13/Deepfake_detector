@@ -6,13 +6,16 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Deepfake Detection API", version="1.0.0")
 
 # ══ CORS MUST BE FIRST — before any routes ════════════════════════════════════
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://deepfake-detection-snowy.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://deepfake-detection-snowy.vercel.app",
-    ],
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
