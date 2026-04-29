@@ -1,6 +1,6 @@
 'use strict';
 
-const API = 'https://deepfake-detector-backend-1dio.onrender.com';
+const API = 'https://harshi3b-deepfake-detector-backend.hf.space';
 
 const State = {
   files: { image: null, audio: null, video: null },
