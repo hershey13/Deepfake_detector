@@ -148,7 +148,7 @@ def extract_features(file_path):
 # ==========================================================
 
 def predict_audio(file_path):
-    model = get_model
+    model = get_model()
     if model is None:
         return {
             "type": "audio",
